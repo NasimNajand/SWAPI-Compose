@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -82,13 +83,6 @@ class MainActivity : ComponentActivity() {
             composable<DetailScreen> { it ->
                 val args = it.toRoute<DetailScreen>()
                 DetailedScreen(args.name)
-
-//                val viewModel: PeopleViewModel = hiltViewModel<PeopleViewModel>()
-//                val characterJson = backStackEntry.arguments?.getString("characterEntity")
-//                val characterEntity = characterJson?.let { json ->
-//                    viewModel.prepareModel(json)
-//                }
-//                characterEntity?.let { DetailScreen(characterEntity = characterEntity) }
             }
         }
     }
@@ -206,9 +200,9 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun PeopleListScreen(navController: NavHostController) {
-        val searchText = remember { mutableStateOf("") }
         val viewModel: PeopleViewModel = hiltViewModel<PeopleViewModel>()
-        val peoplePagingItemsFlow by viewModel.peoplePagingData.collectAsState()
+        val searchText = remember { mutableStateOf(viewModel.searchQuery.value) }
+        val peoplePagingItemsFlow by viewModel.peoplePagingData.collectAsStateWithLifecycle()
         val isLoading by viewModel.loadingState.collectAsState()
 
         val peoplePagingItems = peoplePagingItemsFlow.collectAsLazyPagingItems()
@@ -218,7 +212,6 @@ class MainActivity : ComponentActivity() {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-
             TextField(
                 value = searchText.value,
                 onValueChange = { newValue ->
@@ -236,7 +229,6 @@ class MainActivity : ComponentActivity() {
                 items(peoplePagingItems.itemCount) { index ->
                     peoplePagingItems[index]?.let { personItem ->
                         PersonRow(personItem) {
-                            Log.d(TAG, "PeopleListScreen: clicked")
                             navController.navigate(DetailScreen(name = personItem.name ?: ""))
                         }
                     }

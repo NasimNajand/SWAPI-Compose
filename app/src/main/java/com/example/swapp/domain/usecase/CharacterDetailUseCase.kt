@@ -48,7 +48,8 @@ class CharacterDetailUseCase(
                             },
                             name = person.name,
                             birthYear = person.birthYear,
-                            height = person.height
+                            height = person.height,
+                            homeWorldName = person.homeworld
                         )
                     )
                 }
